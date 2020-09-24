@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:kayztv/models/constants.dart';
 import 'package:kayztv/screens/program_videos_screen.dart';
 import 'nav_drawer.dart';
 import 'app_bar.dart';
@@ -16,8 +17,7 @@ class ProgramsScreen extends StatefulWidget {
 
 class _ProgramsScreenState extends State<ProgramsScreen> {
   GlobalKey<RefreshIndicatorState> refreshKey;
-  List _programs = [];
-  String url = "http://192.168.43.179/kayztv1/api/";
+  List _programs = []; 
 
   @override
   void initState() {
@@ -33,7 +33,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   }
 
   Future<List<Program>> _fetchPrograms() async {
-    var response = await http.get(url + "programs");
+    var response = await http.get(Constants.URL + "programs");
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
 

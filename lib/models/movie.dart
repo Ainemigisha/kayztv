@@ -1,4 +1,5 @@
 class Movie {
+  int videoId;
   String title;
   String video;
   String thumbnail;  
@@ -7,7 +8,8 @@ class Movie {
   DateTime uploadDate;
 
   Movie(
-      {this.title, 
+      {this.videoId,
+      this.title, 
       this.video,
       this.thumbnail,
       this.program,
@@ -15,12 +17,16 @@ class Movie {
 
   factory Movie.fromJson(Map<String, dynamic> map) {
     return Movie(
+      videoId: map['id'],
       title: map['title'],
       video: map['video'],
       thumbnail: map['thumbnail'],
       program: map['program']['name'].toString(),
       uploadDate: DateTime.parse(map['updated_at'])
     );
+  }
+  int get getVideoId{
+    return videoId;
   }
 
   String get getThumbnail {

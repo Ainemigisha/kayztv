@@ -26,10 +26,13 @@ dependencies:
   video_player:
   chewie: 0.9.10 
   http: 0.12.2
-  intl: ^0.16.1
-  flutter_playout: ^1.0.40
+  intl: ^0.16.1 
   font_awesome_flutter: ^8.8.1
-
+  workmanager: ^0.2.3
+  flutter_local_notifications: ^1.4.4+4
+  shared_preferences: ^0.4.2 
+  fluttertoast: ^7.1.1
+  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.3

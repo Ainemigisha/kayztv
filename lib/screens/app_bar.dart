@@ -75,7 +75,6 @@ class DataSearch extends SearchDelegate<String> {
         var data = json.decode(response.body);
 
         List<dynamic> programsJson = data;
-        List<Program> programs = [];
         programsJson.forEach((json) => programs.add(
               Program.fromJson(json),
             ));
@@ -146,7 +145,7 @@ class DataSearch extends SearchDelegate<String> {
                     ),
                   );
                 } else {
-                  return CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                 }
               }),
           SizedBox(height: 10),
@@ -174,7 +173,7 @@ class DataSearch extends SearchDelegate<String> {
                     ),
                   );
                 } else {
-                  return CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                 }
               }),
         ],

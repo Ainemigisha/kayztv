@@ -17,7 +17,6 @@ class VideosScreen extends StatefulWidget {
 
 class _VideosScreenState extends State<VideosScreen> {
   GlobalKey<RefreshIndicatorState> refreshKey;
-  List _movies = [];
 
   @override
   void initState() {
@@ -27,22 +26,20 @@ class _VideosScreenState extends State<VideosScreen> {
   }
 
   _initFecth() async {
-    _movies = await _fetchVideos();
-
     setState(() {});
   }
 
   Future<List<Movie>> _fetchVideos() async {
+    List<Movie> videos = [];
     var response = await http.get(Constants.URL + "videos");
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
 
       List<dynamic> videosJson = data;
-      List<Movie> movies = [];
-      videosJson.forEach((json) => movies.add(
+      videosJson.forEach((json) => videos.add(
             Movie.fromJson(json),
           ));
-      return movies;
+      return videos;
     } else {
       throw json.decode(response.body)['error'];
     }
@@ -51,24 +48,35 @@ class _VideosScreenState extends State<VideosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavDrawer(),
-      appBar: MyAppBar(
-        appBar: AppBar(),
-      ),
-      body: RefreshIndicator(
-        key: refreshKey,
-        onRefresh: () async {
-          _initFecth();
-        },
-        child: GridView.count(
-          childAspectRatio: 1.2,
-          crossAxisCount: 2,
-          children: List.generate(_movies.length, (index) {
-            return _builVideoTile(_movies[index]);
-          }),
+        drawer: NavDrawer(),
+        appBar: MyAppBar(
+          appBar: AppBar(),
         ),
-      ),
-    );
+        body: FutureBuilder(
+            future: _fetchVideos(),
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Movie>> snapshot) {
+              if (snapshot.hasData) {
+                var results = snapshot.data;
+
+                return RefreshIndicator(
+                  key: refreshKey,
+                  onRefresh: () async {
+                    _fetchVideos();
+                    setState(() {});
+                  },
+                  child: GridView.count(
+                    childAspectRatio: 1.2,
+                    crossAxisCount: 2,
+                    children: List.generate(results.length, (index) {
+                      return _builVideoTile(results[index]);
+                    }),
+                  ),
+                );
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }));
   }
 
   _builVideoTile(Movie movie) {
@@ -85,9 +93,7 @@ class _VideosScreenState extends State<VideosScreen> {
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         padding: EdgeInsets.symmetric(vertical: 2),
-        
         child: Column(
-          
           children: <Widget>[
             Image(
               width: 150.0,
