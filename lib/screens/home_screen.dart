@@ -12,6 +12,9 @@ import 'package:intl/intl.dart';
 import 'package:kayztv/models/constants.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../helpers/SharedPrefsHelper.dart';
+import '../helpers/SharedPrefsHelper.dart';
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key}) : super(key: key);
 
@@ -234,25 +237,34 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
 Future<List<Movie>> _fetchVideosByDt() async {
   DateTime currentDateTime = DateTime.now();
-  List<Movie> videos = [];
-  String link = Constants.URL + "videos/date/" + currentDateTime.toString();
-  print(link);
-  print('lllllllllllllllllllllleeeeeLLLLLLLRRRRRRRRRRRRRRRRRRRRRaaaaaassssss');
-  var response = await http.get(link);
-  print(response);
+  DateTime recentDt;
 
-  if (response.statusCode == 200) {
-    var data = json.decode(response.body);
-    print('ererrererrrrrrrrrrrrr');
-    List<dynamic> videosJson = data;
-    videosJson.forEach((json) => videos.add(
-          Movie.fromJson(json),
-        ));
-    return videos;
-  } else {
-    print('ccccccccccccccccchhhhhhhhhhhhhhhhhheeeeeeeeeeeeeiiiiiii');
-    throw json.decode(response.body)['error'];
+  // DateTime recentDt = await SharedPrefsHelper.getRecentFetchDt();
+  print('Recent Dt');
+  print(recentDt);
+  if (recentDt != null) {
+    List<Movie> videos = [];
+    String link = Constants.URL + "videos/date/" + currentDateTime.toString();
+    print(link);
+    print(
+        'lllllllllllllllllllllleeeeeLLLLLLLRRRRRRRRRRRRRRRRRRRRRaaaaaassssss');
+    var response = await http.get(link);
+    print(response);
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      print('ererrererrrrrrrrrrrrr');
+      List<dynamic> videosJson = data;
+      videosJson.forEach((json) => videos.add(
+            Movie.fromJson(json),
+          ));
+      return videos;
+    } else {
+      print('ccccccccccccccccchhhhhhhhhhhhhhhhhheeeeeeeeeeeeeiiiiiii');
+      throw json.decode(response.body)['error'];
+    }
   }
+  // SharedPrefsHelper.setRecentFetchDt(currentDateTime.toString());
 }
 
 void callbackDispatcher() {
@@ -262,16 +274,15 @@ void callbackDispatcher() {
       FlutterLocalNotificationsPlugin flip =
           new FlutterLocalNotificationsPlugin();
 
-      
       var android = new AndroidInitializationSettings('@drawable/kayz_logo');
       var iOS = new IOSInitializationSettings();
- 
+
       var settings = new InitializationSettings(android, iOS);
       flip.initialize(settings);
-      for(var video in res){
-        _showNotificationWithDefaultSound(flip,video);
-      } 
-    } 
+      for (var video in res) {
+        _showNotificationWithDefaultSound(flip, video);
+      }
+    }
 
     return Future.value(true);
   });
@@ -291,9 +302,6 @@ Future _showNotificationWithDefaultSound(flip, Movie video) async {
   var platformChannelSpecifics = new NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
   await flip.show(
-      0,
-      "KayzTv "+video.getProgram,
-      video.getTitle,
-      platformChannelSpecifics,
+      0, "KayzTv " + video.getProgram, video.getTitle, platformChannelSpecifics,
       payload: 'Default_Sound');
 }

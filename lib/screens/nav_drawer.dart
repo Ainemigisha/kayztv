@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kayztv/screens/home_screen.dart';
 import 'package:kayztv/screens/programs_screen.dart';
 import 'package:kayztv/screens/videos_screen.dart';
+import 'package:kayztv/screens/live_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'tcs_screen.dart';
 
@@ -45,6 +46,28 @@ class NavDrawer extends StatelessWidget {
                     title: Row(
                       children: <Widget>[
                         Icon(
+                          Icons.home,
+                          color: Colors.white,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            'Live',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ),
+                        )
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => LiveScreen()));
+                    },
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: <Widget>[
+                        Icon(
                           Icons.movie,
                           color: Colors.white,
                         ),
@@ -67,7 +90,7 @@ class NavDrawer extends StatelessWidget {
                     title: Row(
                       children: <Widget>[
                         Icon(
-                          Icons.speaker_notes,
+                          Icons.live_tv,
                           color: Colors.white,
                         ),
                         Padding(
@@ -117,14 +140,25 @@ class NavDrawer extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 IconButton(
-                  icon: FaIcon(FontAwesomeIcons.facebookSquare, size: 35,),
-                  onPressed: () {}, 
-                ),IconButton(
-                  icon: FaIcon(FontAwesomeIcons.twitterSquare,size: 35,),
-                  onPressed: () {}, 
-                ),IconButton(
-                  icon: FaIcon(FontAwesomeIcons.instagramSquare,  size: 35,),
-                  onPressed: () {}, 
+                  icon: FaIcon(
+                    FontAwesomeIcons.facebookSquare,
+                    size: 35,
+                  ),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: FaIcon(
+                    FontAwesomeIcons.twitterSquare,
+                    size: 35,
+                  ),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: FaIcon(
+                    FontAwesomeIcons.instagramSquare,
+                    size: 35,
+                  ),
+                  onPressed: () {},
                 ),
               ],
             ),
