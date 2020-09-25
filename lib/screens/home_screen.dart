@@ -13,7 +13,6 @@ import 'package:kayztv/models/constants.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../helpers/SharedPrefsHelper.dart';
-import '../helpers/SharedPrefsHelper.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key}) : super(key: key);
@@ -51,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future<List<Movie>> _fetchVideos() async {
     List<Movie> videos = [];
+
     var response = await http.get(Constants.URL + "videos");
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
@@ -223,14 +223,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       // frequency: Duration(minutes: 15),
       initialDelay: Duration(seconds: 5),
     );
-    print('BINTWALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
     return true;
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    print('disposingaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     super.dispose();
   }
 }
@@ -238,47 +236,46 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 Future<List<Movie>> _fetchVideosByDt() async {
   DateTime currentDateTime = DateTime.now();
   DateTime recentDt;
+  List<Movie> videos = [];
 
-  // DateTime recentDt = await SharedPrefsHelper.getRecentFetchDt();
-  print('Recent Dt');
+  recentDt = await SharedPrefsHelper.getRecentFetchDt();
   print(recentDt);
+  SharedPrefsHelper.setRecentFetchDt(currentDateTime
+      .toString()); //set the recent date in history to current date
   if (recentDt != null) {
-    List<Movie> videos = [];
-    String link = Constants.URL + "videos/date/" + currentDateTime.toString();
+    String link = Constants.URL + "videos/date/" + recentDt.toString();
     print(link);
-    print(
-        'lllllllllllllllllllllleeeeeLLLLLLLRRRRRRRRRRRRRRRRRRRRRaaaaaassssss');
     var response = await http.get(link);
     print(response);
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
-      print('ererrererrrrrrrrrrrrr');
       List<dynamic> videosJson = data;
       videosJson.forEach((json) => videos.add(
             Movie.fromJson(json),
           ));
       return videos;
     } else {
-      print('ccccccccccccccccchhhhhhhhhhhhhhhhhheeeeeeeeeeeeeiiiiiii');
       throw json.decode(response.body)['error'];
     }
   }
-  // SharedPrefsHelper.setRecentFetchDt(currentDateTime.toString());
+
+  return videos;
 }
 
 void callbackDispatcher() {
   Workmanager.executeTask((task, inputData) async {
     List<Movie> res = await _fetchVideosByDt();
+    FlutterLocalNotificationsPlugin flip =
+        new FlutterLocalNotificationsPlugin();
+
+    var android = new AndroidInitializationSettings('@drawable/kayz_logo');
+    var iOS = new IOSInitializationSettings();
+
+    var settings = new InitializationSettings(android, iOS);
+    flip.initialize(settings);
+    print("LENGTH IS" +res.length.toString());
     if (res.length != 0) {
-      FlutterLocalNotificationsPlugin flip =
-          new FlutterLocalNotificationsPlugin();
-
-      var android = new AndroidInitializationSettings('@drawable/kayz_logo');
-      var iOS = new IOSInitializationSettings();
-
-      var settings = new InitializationSettings(android, iOS);
-      flip.initialize(settings);
       for (var video in res) {
         _showNotificationWithDefaultSound(flip, video);
       }
@@ -302,6 +299,7 @@ Future _showNotificationWithDefaultSound(flip, Movie video) async {
   var platformChannelSpecifics = new NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
   await flip.show(
-      0, "KayzTv " + video.getProgram, video.getTitle, platformChannelSpecifics,
+      video.getVideoId, "KayzTv " + video.getProgram, video.getTitle, platformChannelSpecifics,
       payload: 'Default_Sound');
 }
+

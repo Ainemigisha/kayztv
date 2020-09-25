@@ -23,6 +23,9 @@ class SharedPrefsHelper {
 
   static Future<DateTime> getRecentFetchDt() async {
     String recenFetch = await getRecentFetch();
+    print(recenFetch);
+    if(recenFetch == null)
+      return null;
     return DateTime.parse(recenFetch);
   }
 }
