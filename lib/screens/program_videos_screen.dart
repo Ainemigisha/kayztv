@@ -51,47 +51,49 @@ class _ProgramVideosScreenState extends State<ProgramVideosScreen> {
         appBar: MyAppBar(
           appBar: AppBar(),
         ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(8),
-              child: Text(
-                widget.program.getName,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 25),
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                height: 20,
               ),
-            ),
-            FutureBuilder(
-              future: _fetchVideosByProgram(),
-              builder:
-                  (BuildContext context, AsyncSnapshot<List<Movie>> snapshot) {
-                if (snapshot.hasData) {
-                  var results = snapshot.data;
-                  return Expanded(
-                    child: RefreshIndicator(
+              Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(8),
+                child: Text(
+                  widget.program.getName,
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 25),
+                ),
+              ),
+              FutureBuilder(
+                future: _fetchVideosByProgram(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<Movie>> snapshot) {
+                  if (snapshot.hasData) {
+                    var results = snapshot.data;
+                    return RefreshIndicator(
                       key: refreshKey,
                       onRefresh: () async {
                         _fetchVideosByProgram();
                         setState(() {});
                       },
                       child: ListView.builder(
+                          primary: false,
+                          shrinkWrap: true,
                           itemCount: results.length,
                           itemBuilder: (BuildContext context, int index) {
                             return _builVideoTile(results[index]);
                           }),
-                    ),
-                  );
-                } else {
-                  return Center(child: CircularProgressIndicator());
-                }
-              },
-            ),
-          ],
+                    );
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+            ],
+          ),
         )
 
         // This trailing comma makes auto-formatting nicer for build methods.

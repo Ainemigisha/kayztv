@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:kayztv/models/movie.dart'; 
+import 'package:kayztv/models/movie.dart';
 
 import 'package:intl/intl.dart';
 import 'package:kayztv/models/constants.dart';
@@ -16,7 +16,7 @@ class FeaturedPlayerScreen extends StatefulWidget {
 
 class _FeaturedPlayerScreenState extends State<FeaturedPlayerScreen> {
   VideoPlayerController _controller;
-  ChewieController _chewieController; 
+  ChewieController _chewieController;
   String url;
 
   @override
@@ -31,7 +31,7 @@ class _FeaturedPlayerScreenState extends State<FeaturedPlayerScreen> {
     _chewieController = ChewieController(
         videoPlayerController: _controller,
         aspectRatio: 16 / 9,
-        allowFullScreen: true,
+        fullScreenByDefault: true,
         autoPlay: false,
         looping: false,
         autoInitialize: true,
@@ -53,18 +53,17 @@ class _FeaturedPlayerScreenState extends State<FeaturedPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Column(
-        mainAxisAlignment: MainAxisAlignment.start, 
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Container(
-              decoration: BoxDecoration( 
-                  border: Border.all(
-                    width: 2,
-                  )),
-              child: Chewie(
-                controller: _chewieController,
-              ),
+            decoration: BoxDecoration(
+                border: Border.all(
+              width: 2,
+            )),
+            child: Chewie(
+              controller: _chewieController,
             ),
-          
+          ),
           SizedBox(
             height: 20,
           ),

@@ -46,7 +46,7 @@ class NavDrawer extends StatelessWidget {
                     title: Row(
                       children: <Widget>[
                         Icon(
-                          Icons.home,
+                          Icons.live_tv,
                           color: Colors.white,
                         ),
                         Padding(

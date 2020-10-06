@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
         // If enabled it will post a notification whenever
         // the task is running. Handy for debugging tasks
-        isInDebugMode: true);
+        isInDebugMode: false);
   }
 
   @override
@@ -87,25 +87,27 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   _fetchVideos();
                   setState(() {});
                 },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      child: _buildFeaturedImage(results[0]),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: _buildFeaturedImage(results[0]),
+                      ),
+                      ListView.builder(
+                          primary: false,
+                          shrinkWrap: true,
                           itemCount: results.length - 1,
                           itemBuilder: (BuildContext context, int index) {
                             return _builVideoTile(results[index + 1]);
                           }),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             } else {
@@ -207,22 +209,22 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           textColor: Colors.white);
       return false;
     }
-    Workmanager.registerOneOffTask(
-      "1",
+    // Workmanager.registerOneOffTask(
+    //   "1",
 
-      //This is the value that will be
-      // returned in the callbackDispatcher
-      "oneOffTask",
+    //   //This is the value that will be
+    //   // returned in the callbackDispatcher
+    //   "oneOffTask",
 
-      // When no frequency is provided
-      // the default 15 minutes is set.
-      // Minimum frequency is 15 min.
-      // Android will automatically change
-      // your frequency to 15 min
-      // if you have configured a lower frequency.
-      // frequency: Duration(minutes: 15),
-      initialDelay: Duration(seconds: 5),
-    );
+    //   // When no frequency is provided
+    //   // the default 15 minutes is set.
+    //   // Minimum frequency is 15 min.
+    //   // Android will automatically change
+    //   // your frequency to 15 min
+    //   // if you have configured a lower frequency.
+    //   // frequency: Duration(minutes: 15),
+    //   initialDelay: Duration(seconds: 5),
+    // );
     return true;
   }
 
@@ -274,7 +276,7 @@ void callbackDispatcher() {
 
     var settings = new InitializationSettings(android, iOS);
     flip.initialize(settings);
-    print("LENGTH IS" +res.length.toString());
+    print("LENGTH IS" + res.length.toString());
     if (res.length != 0) {
       for (var video in res) {
         _showNotificationWithDefaultSound(flip, video);
@@ -298,8 +300,7 @@ Future _showNotificationWithDefaultSound(flip, Movie video) async {
   // initialise channel platform for both Android and iOS device.
   var platformChannelSpecifics = new NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-  await flip.show(
-      video.getVideoId, "KayzTv " + video.getProgram, video.getTitle, platformChannelSpecifics,
+  await flip.show(video.getVideoId, "KayzTv " + video.getProgram,
+      video.getTitle, platformChannelSpecifics,
       payload: 'Default_Sound');
 }
-

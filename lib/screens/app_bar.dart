@@ -82,7 +82,7 @@ class DataSearch extends SearchDelegate<String> {
       } else {
         throw json.decode(response.body)['error'];
       }
-    }else{
+    } else {
       return programs;
     }
   }
