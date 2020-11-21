@@ -1,5 +1,6 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 import '../models/constants.dart';
@@ -29,13 +30,13 @@ class _LiveScreenState extends State<LiveScreen> {
         aspectRatio: 16 / 9,
         fullScreenByDefault: true,
         allowFullScreen: true,
-        autoPlay: false,
+        autoPlay: true,
         looping: false,
         autoInitialize: true,
         showControlsOnInitialize: false,
+        allowedScreenSleep: false,
+        deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
         isLive: true);
-
-    //  _initializeVideoPlayerFuture = _controller.initialize();
 
     super.initState();
   }

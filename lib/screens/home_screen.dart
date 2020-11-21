@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -22,7 +23,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  AppLifecycleState _lastLifecycleState;
   GlobalKey<RefreshIndicatorState> refreshKey;
   DateTime backbuttonpressedTime;
 
@@ -39,13 +39,32 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         // If enabled it will post a notification whenever
         // the task is running. Handy for debugging tasks
         isInDebugMode: false);
+    _registerBackgroundTask();
+  }
+
+  void _registerBackgroundTask() {
+    Workmanager.registerPeriodicTask(
+        "1",
+
+        //This is the value that will be
+        // returned in the callbackDispatcher
+        "messagesFetch",
+
+        // When no frequency is provided
+        // the default 15 minutes is set.
+        // Minimum frequency is 15 min.
+        // Android will automatically change
+        // your frequency to 15 min
+        // if you have configured a lower frequency.
+        frequency: Duration(minutes: 60),
+        constraints: Constraints(
+          networkType: NetworkType.connected,
+        ));
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _lastLifecycleState = state;
-    });
+    setState(() {});
   }
 
   Future<List<Movie>> _fetchVideos() async {
@@ -132,9 +151,23 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         );
       },
       child: Column(children: <Widget>[
-        Image(
-          image: NetworkImage(Constants.PATH + movie.getThumbnail),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+              minWidth: double.infinity, maxHeight: 200, minHeight: 200),
+          child: CachedNetworkImage(
+              imageUrl: Constants.PATH + movie.getThumbnail,
+              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                  Container(
+                    width: 20,
+                    margin: EdgeInsets.symmetric(horizontal: 30),
+                    child: CircularProgressIndicator(
+                        value: downloadProgress.progress),
+                  )),
         ),
+
+        // Image(
+        //   image: NetworkImage(Constants.PATH + movie.getThumbnail),
+        // ),
         SizedBox(
           height: 10,
         ),
@@ -168,10 +201,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Image(
-              width: 150.0,
-              image: NetworkImage(Constants.PATH + movie.getThumbnail),
+            SizedBox(
+              width: 150,
+              child: CachedNetworkImage(
+                imageUrl: Constants.PATH + movie.getThumbnail,
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    CircularProgressIndicator(value: downloadProgress.progress),
+              ),
             ),
+            // Image(
+            //   width: 150.0,
+            //   image: NetworkImage(Constants.PATH + movie.getThumbnail),
+            // ),
             SizedBox(width: 10.0),
             Expanded(
               child: Column(
@@ -209,22 +250,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           textColor: Colors.white);
       return false;
     }
-    // Workmanager.registerOneOffTask(
-    //   "1",
-
-    //   //This is the value that will be
-    //   // returned in the callbackDispatcher
-    //   "oneOffTask",
-
-    //   // When no frequency is provided
-    //   // the default 15 minutes is set.
-    //   // Minimum frequency is 15 min.
-    //   // Android will automatically change
-    //   // your frequency to 15 min
-    //   // if you have configured a lower frequency.
-    //   // frequency: Duration(minutes: 15),
-    //   initialDelay: Duration(seconds: 5),
-    // );
     return true;
   }
 
@@ -235,15 +260,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 }
 
-Future<List<Movie>> _fetchVideosByDt() async {
+List<Movie> newVideos;
+List<String> newMessages;
+
+Future<void> _fetchByDt() async {
   DateTime currentDateTime = DateTime.now();
   DateTime recentDt;
-  List<Movie> videos = [];
-
   recentDt = await SharedPrefsHelper.getRecentFetchDt();
-  print(recentDt);
   SharedPrefsHelper.setRecentFetchDt(currentDateTime
       .toString()); //set the recent date in history to current date
+  newVideos = await _fetchVideosByDt(recentDt);
+  newMessages = await _fetchStreamMessagesByDt(recentDt);
+}
+
+Future<List<Movie>> _fetchVideosByDt(DateTime recentDt) async {
+  List<Movie> videos = [];
   if (recentDt != null) {
     String link = Constants.URL + "videos/date/" + recentDt.toString();
     print(link);
@@ -265,9 +296,35 @@ Future<List<Movie>> _fetchVideosByDt() async {
   return videos;
 }
 
+Future<List<String>> _fetchStreamMessagesByDt(DateTime recentDt) async {
+  List<String> messages = [];
+
+  //set the recent date in history to current date
+  if (recentDt != null) {
+    String link = Constants.URL + "messages/date/" + recentDt.toString();
+    print(link);
+    var response = await http.get(link);
+    print(response);
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      List<dynamic> messagesJson = data;
+      messagesJson.forEach((json) => messages.add(
+            json['message'].toString(),
+          ));
+      return messages;
+    } else {
+      throw json.decode(response.body)['error'];
+    }
+  }
+
+  return messages;
+}
+
 void callbackDispatcher() {
   Workmanager.executeTask((task, inputData) async {
-    List<Movie> res = await _fetchVideosByDt();
+    await _fetchByDt();
+    print(newMessages);
     FlutterLocalNotificationsPlugin flip =
         new FlutterLocalNotificationsPlugin();
 
@@ -276,10 +333,15 @@ void callbackDispatcher() {
 
     var settings = new InitializationSettings(android, iOS);
     flip.initialize(settings);
-    print("LENGTH IS" + res.length.toString());
-    if (res.length != 0) {
-      for (var video in res) {
-        _showNotificationWithDefaultSound(flip, video);
+    if (newVideos.length != 0) {
+      for (var video in newVideos) {
+        _showVideoNotificationWithDefaultSound(flip, video);
+      }
+    }
+
+    if (newMessages.length != 0) {
+      for (var message in newMessages) {
+        _showAlertNotificationWithDefaultSound(flip, message);
       }
     }
 
@@ -289,7 +351,7 @@ void callbackDispatcher() {
 
 void runNotification() {}
 
-Future _showNotificationWithDefaultSound(flip, Movie video) async {
+Future _showVideoNotificationWithDefaultSound(flip, Movie video) async {
   // Show a notification after every 15 minute with the first
   // appearance happening a minute after invoking the method
   var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
@@ -302,5 +364,20 @@ Future _showNotificationWithDefaultSound(flip, Movie video) async {
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
   await flip.show(video.getVideoId, "KayzTv " + video.getProgram,
       video.getTitle, platformChannelSpecifics,
+      payload: 'Default_Sound');
+}
+
+Future _showAlertNotificationWithDefaultSound(flip, String message) async {
+  // Show a notification after every 15 minute with the first
+  // appearance happening a minute after invoking the method
+  var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+      'newAlertId', 'Alerts', 'Alert messages',
+      importance: Importance.Max, priority: Priority.High);
+  var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+
+  // initialise channel platform for both Android and iOS device.
+  var platformChannelSpecifics = new NotificationDetails(
+      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+  await flip.show(1, "KayzTv", message, platformChannelSpecifics,
       payload: 'Default_Sound');
 }

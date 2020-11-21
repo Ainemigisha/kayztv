@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:kayztv/models/movie.dart';
@@ -29,13 +30,16 @@ class _FeaturedPlayerScreenState extends State<FeaturedPlayerScreen> {
       url,
     );
     _chewieController = ChewieController(
-        videoPlayerController: _controller,
-        aspectRatio: 16 / 9,
-        fullScreenByDefault: true,
-        autoPlay: false,
-        looping: false,
-        autoInitialize: true,
-        showControlsOnInitialize: false);
+      videoPlayerController: _controller,
+      aspectRatio: 16 / 9,
+      fullScreenByDefault: true,
+      autoPlay: false,
+      looping: false,
+      autoInitialize: true,
+      showControlsOnInitialize: true,
+      allowedScreenSleep: false,
+      deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
+    );
 
     //  _initializeVideoPlayerFuture = _controller.initialize();
 

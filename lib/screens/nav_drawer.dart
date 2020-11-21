@@ -60,7 +60,7 @@ class NavDrawer extends StatelessWidget {
                     ),
                     onTap: () {
                       Navigator.of(context).pop();
-                      Navigator.of(context).push(MaterialPageRoute(
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (BuildContext context) => LiveScreen()));
                     },
                   ),
